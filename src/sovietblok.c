@@ -30,6 +30,7 @@ int8_t currentBlockWidth;
 int8_t currentBlockPosX;
 int64_t score = 0;
 int8_t notificationMessage[50];
+int64_t streakLength = 0;
 
 void clearBoard() {
     int8_t index = 0;
@@ -170,6 +171,17 @@ void setBlock(int8_t posX, int8_t posY, int8_t block) {
     board[posX + posY * boardWidth] = block;
 }
 
+int8_t boardIsEmpty() {
+    int32_t index = 0;
+    while (index < boardWidth * boardHeight) {
+        if (board[index] != 0) {
+            return false;
+        }
+        index += 1;
+    }
+    return true;
+}
+
 int8_t dropBlock() {
     int8_t tempPosY = 0;
     while (tempPosY < boardHeight) {
@@ -213,6 +225,7 @@ int8_t dropBlock() {
         tempEndPosX += 1;
     }
     int8_t tempCount = tempEndPosX - tempStartPosX + 1;
+    notificationMessage[0] = 0;
     if (tempCount >= 3) {
         int8_t tempPosX = tempStartPosX;
         while (tempPosX <= tempEndPosX) {
@@ -221,10 +234,31 @@ int8_t dropBlock() {
             tempPosX += 1;
         }
         score += tempCount;
-        drawTextInformation();
+        streakLength += 1;
+        if (boardIsEmpty()) {
+            strcpy((char *)notificationMessage, "EMPTY");
+        }
+        if (streakLength == 2) {
+            strcpy((char *)notificationMessage, "DOUBLE");
+        }
+        if (streakLength == 3) {
+            strcpy((char *)notificationMessage, "TRIPLE");
+        }
+        if (streakLength > 3) {
+            strcpy((char *)notificationMessage, "MULTI");
+        }
+        if (tempCount == 5) {
+            strcpy((char *)notificationMessage, "5 CLEAR");
+        }
+        if (tempCount == 6) {
+            strcpy((char *)notificationMessage, "6 CLEAR");
+        }
+    } else {
+        streakLength = 0;
     }
     generateCurrentBlock();
     drawCurrentBlock();
+    drawTextInformation();
     return true;
 }
 
