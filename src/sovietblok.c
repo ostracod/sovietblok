@@ -58,8 +58,11 @@ void drawBlock(int8_t block, int32_t posX, int32_t posY) {
     posY *= blockHeight;
     attron(COLOR_PAIR(tempColor));
     mvprintw(posY, posX, "     ");
+    refresh();
     mvprintw(posY + 1, posX, "  *  ");
+    refresh();
     mvprintw(posY + 2, posX, "     ");
+    refresh();
     attroff(COLOR_PAIR(tempColor));
 }
 
@@ -132,16 +135,26 @@ void handleResize() {
     drawEverything();
 }
 
+void moveCurrentBlock(int8_t offsetX) {
+    int8_t tempPosX = currentBlockPosX + offsetX;
+    if (tempPosX < 0 || tempPosX + currentBlockWidth > boardWidth) {
+        return;
+    }
+    eraseCurrentBlock();
+    currentBlockPosX = tempPosX;
+    drawCurrentBlock();
+}
+
 int8_t processKey() {
     int32_t tempKey = getch();
     if (tempKey == KEY_RESIZE) {
         handleResize();
     }
     if (tempKey == KEY_LEFT || tempKey == 'a') {
-        
+        moveCurrentBlock(-1);
     }
     if (tempKey == KEY_RIGHT || tempKey == 'd') {
-        
+        moveCurrentBlock(1);
     }
     if (tempKey == KEY_DOWN || tempKey == 's') {
         
