@@ -15,6 +15,7 @@
 #define WHITE_ON_BLACK 4
 #define WHITE_ON_RED 5
 #define WHITE_ON_GREEN 6
+#define BLACK_ON_WHITE 7
 
 WINDOW *window;
 int32_t windowWidth = -1;
@@ -27,6 +28,8 @@ int8_t *board;
 int8_t currentBlock;
 int8_t currentBlockWidth;
 int8_t currentBlockPosX;
+int64_t score = 0;
+int8_t notificationMessage[50];
 
 void clearBoard() {
     int8_t index = 0;
@@ -117,10 +120,24 @@ void eraseCurrentBlock() {
     }
 }
 
+void drawTextInformation() {
+    attron(COLOR_PAIR(BLACK_ON_WHITE));
+    mvprintw(22, 5, "                 ");
+    refresh();
+    mvprintw(22, 5, "BREAD: %lld", score);
+    refresh();
+    mvprintw(22, 40, "                 ");
+    refresh();
+    mvprintw(22, 40, "%s", notificationMessage);
+    refresh();
+    attroff(COLOR_PAIR(BLACK_ON_WHITE));
+}
+
 void drawEverything() {
     drawBackground();
     drawBoard();
     drawCurrentBlock();
+    drawTextInformation();
 }
 
 void handleResize() {
@@ -203,9 +220,9 @@ int8_t dropBlock() {
             drawBlock(tempPosX, tempPosY, 0);
             tempPosX += 1;
         }
+        score += tempCount;
+        drawTextInformation();
     }
-    // TODO: Increase score.
-    
     generateCurrentBlock();
     drawCurrentBlock();
     return true;
@@ -236,6 +253,7 @@ int main(int argc, const char *argv[]) {
     board = tempBoard;
     clearBoard();
     generateCurrentBlock();
+    notificationMessage[0] = 0;
     
     window = initscr();
     noecho();
@@ -249,6 +267,7 @@ int main(int argc, const char *argv[]) {
     init_pair(WHITE_ON_BLACK, COLOR_WHITE, COLOR_BLACK);
     init_pair(WHITE_ON_RED, COLOR_WHITE, COLOR_RED);
     init_pair(WHITE_ON_GREEN, COLOR_WHITE, COLOR_GREEN);
+    init_pair(BLACK_ON_WHITE, COLOR_BLACK, COLOR_WHITE);
     handleResize();
     
     while (true) {
@@ -257,6 +276,10 @@ int main(int argc, const char *argv[]) {
             break;
         }
     }
+    
+    strcpy((char *)notificationMessage, "BLOK OVERFLOW");
+    drawTextInformation();
+    getch();
     
     endwin();
     
