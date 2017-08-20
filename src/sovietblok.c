@@ -9,11 +9,18 @@
 #define true 1
 #define false 0
 
-#define BLACK_ON_CYAN 1
+#define CYAN_ON_BLUE 1
+#define BLACK_ON_CYAN 2
+#define BLACK_ON_WHITE 3
+#define WHITE_ON_BLACK 4
+#define WHITE_ON_RED 5
+#define WHITE_ON_GREEN 6
 
 WINDOW *window;
 int32_t windowWidth = -1;
 int32_t windowHeight = -1;
+int32_t blockWidth = 5;
+int32_t blockHeight = 3;
 
 void drawBackground() {
     attron(COLOR_PAIR(BLACK_ON_CYAN));
@@ -29,8 +36,22 @@ void drawBackground() {
     attroff(COLOR_PAIR(BLACK_ON_CYAN));
 }
 
+void drawBlock(int8_t color, int32_t posX, int32_t posY) {
+    color += 2;
+    posX += 2;
+    posY += 2;
+    posX *= blockWidth;
+    posY *= blockHeight;
+    attron(COLOR_PAIR(color));
+    mvprintw(posY, posX, "     ");
+    mvprintw(posY + 1, posX, "  *  ");
+    mvprintw(posY + 2, posX, "     ");
+    attroff(COLOR_PAIR(color));
+}
+
 void drawEverything() {
     drawBackground();
+    drawBlock(2, 0, 0);
 }
 
 void handleResize() {
@@ -76,6 +97,11 @@ int main(int argc, const char *argv[]) {
     ESCDELAY = 50;
     start_color();
     init_pair(BLACK_ON_CYAN, COLOR_BLACK, COLOR_CYAN);
+    init_pair(BLACK_ON_WHITE, COLOR_BLACK, COLOR_WHITE);
+    init_pair(WHITE_ON_BLACK, COLOR_WHITE, COLOR_BLACK);
+    init_pair(WHITE_ON_RED, COLOR_WHITE, COLOR_RED);
+    init_pair(WHITE_ON_GREEN, COLOR_WHITE, COLOR_GREEN);
+    init_pair(CYAN_ON_BLUE, COLOR_CYAN, COLOR_BLUE);
     handleResize();
     
     while (true) {
