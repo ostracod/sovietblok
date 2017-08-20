@@ -21,6 +21,17 @@ int32_t windowWidth = -1;
 int32_t windowHeight = -1;
 int32_t blockWidth = 5;
 int32_t blockHeight = 3;
+int8_t boardWidth = 8;
+int8_t boardHeight = 4;
+int8_t *board;
+
+void clearBoard() {
+    int8_t index = 0;
+    while (index < boardWidth * boardHeight) {
+        board[index] = 0;
+        index += 1;
+    }
+}
 
 void drawBackground() {
     attron(COLOR_PAIR(BLACK_ON_CYAN));
@@ -36,22 +47,50 @@ void drawBackground() {
     attroff(COLOR_PAIR(BLACK_ON_CYAN));
 }
 
-void drawBlock(int8_t color, int32_t posX, int32_t posY) {
-    color += 2;
+void drawBlock(int8_t block, int32_t posX, int32_t posY) {
+    int8_t tempColor = block + 2;
     posX += 2;
     posY += 2;
     posX *= blockWidth;
     posY *= blockHeight;
-    attron(COLOR_PAIR(color));
+    attron(COLOR_PAIR(tempColor));
     mvprintw(posY, posX, "     ");
     mvprintw(posY + 1, posX, "  *  ");
     mvprintw(posY + 2, posX, "     ");
-    attroff(COLOR_PAIR(color));
+    attroff(COLOR_PAIR(tempColor));
+}
+
+void drawBoard() {
+    int8_t tempPosY = 0;
+    while (tempPosY <= boardHeight) {
+        drawBlock(-1, -1, tempPosY);
+        drawBlock(-1, boardWidth, tempPosY);
+        tempPosY += 1;
+    }
+    int8_t tempPosX = 0;
+    while (tempPosX < boardWidth) {
+        drawBlock(0, tempPosX, -1);
+        drawBlock(-1, tempPosX, boardHeight);
+        tempPosX += 1;
+    }
+    int8_t index = 0;
+    tempPosX = 0;
+    tempPosY = 0;
+    while (tempPosY < boardHeight) {
+        int8_t tempBlock = board[index];
+        drawBlock(tempBlock, tempPosX, tempPosY);
+        index += 1;
+        tempPosX += 1;
+        if (tempPosX >= boardWidth) {
+            tempPosX = 0;
+            tempPosY += 1;
+        }
+    }
 }
 
 void drawEverything() {
     drawBackground();
-    drawBlock(2, 0, 0);
+    drawBoard();
 }
 
 void handleResize() {
@@ -65,9 +104,6 @@ void handleResize() {
     windowHeight = tempHeight;
     drawEverything();
 }
-
-void handleResize();
-int8_t getTestKey();
 
 int8_t processKey() {
     int32_t tempKey = getch();
@@ -89,6 +125,10 @@ int8_t processKey() {
 int main(int argc, const char *argv[]) {
     
     srand(time(NULL));
+    
+    int8_t tempBoard[boardWidth * boardHeight];
+    board = tempBoard;
+    clearBoard();
     
     window = initscr();
     noecho();
