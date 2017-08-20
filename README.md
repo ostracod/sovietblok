@@ -12,7 +12,7 @@ On Linux systems, you will first need to install ncurses. (This step is not nece
 sudo apt-get install libncurses-dev
 ```
 
-Then compile and install BreadText:
+Then compile and install Soviet Blok:
 
 ```
 make
