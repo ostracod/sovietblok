@@ -50,7 +50,7 @@ void drawBackground() {
     attroff(COLOR_PAIR(CYAN_ON_WHITE));
 }
 
-void drawBlock(int8_t block, int32_t posX, int32_t posY) {
+void drawBlock(int32_t posX, int32_t posY, int8_t block) {
     int8_t tempColor = block + 2;
     posX += 2;
     posY += 2;
@@ -69,14 +69,14 @@ void drawBlock(int8_t block, int32_t posX, int32_t posY) {
 void drawBoard() {
     int8_t tempPosY = 0;
     while (tempPosY <= boardHeight) {
-        drawBlock(-1, -1, tempPosY);
-        drawBlock(-1, boardWidth, tempPosY);
+        drawBlock(-1, tempPosY, -1);
+        drawBlock(boardWidth, tempPosY, -1);
         tempPosY += 1;
     }
     int8_t tempPosX = 0;
     while (tempPosX < boardWidth) {
-        drawBlock(0, tempPosX, -1);
-        drawBlock(-1, tempPosX, boardHeight);
+        drawBlock(tempPosX, -1, 0);
+        drawBlock(tempPosX, boardHeight, -1);
         tempPosX += 1;
     }
     int8_t index = 0;
@@ -84,7 +84,7 @@ void drawBoard() {
     tempPosY = 0;
     while (tempPosY < boardHeight) {
         int8_t tempBlock = board[index];
-        drawBlock(tempBlock, tempPosX, tempPosY);
+        drawBlock(tempPosX, tempPosY, tempBlock);
         index += 1;
         tempPosX += 1;
         if (tempPosX >= boardWidth) {
@@ -104,16 +104,16 @@ void generateCurrentBlock() {
 }
 
 void drawCurrentBlock() {
-    drawBlock(currentBlock, currentBlockPosX, -1);
+    drawBlock(currentBlockPosX, -1, currentBlock);
     if (currentBlockWidth > 1) {
-        drawBlock(currentBlock, currentBlockPosX + 1, -1);
+        drawBlock(currentBlockPosX + 1, -1, currentBlock);
     }
 }
 
 void eraseCurrentBlock() {
-    drawBlock(0, currentBlockPosX, -1);
+    drawBlock(currentBlockPosX, -1, 0);
     if (currentBlockWidth > 1) {
-        drawBlock(0, currentBlockPosX + 1, -1);
+        drawBlock(currentBlockPosX + 1, -1, 0);
     }
 }
 
@@ -174,11 +174,38 @@ int8_t dropBlock() {
     }
     eraseCurrentBlock();
     setBlock(currentBlockPosX, tempPosY, currentBlock);
-    drawBlock(currentBlock, currentBlockPosX, tempPosY);
+    drawBlock(currentBlockPosX, tempPosY, currentBlock);
     if (currentBlockWidth > 1) {
         setBlock(currentBlockPosX + 1, tempPosY, currentBlock);
-        drawBlock(currentBlock, currentBlockPosX + 1, tempPosY);
+        drawBlock(currentBlockPosX + 1, tempPosY, currentBlock);
     }
+    int8_t tempStartPosX = currentBlockPosX;
+    int8_t tempEndPosX = currentBlockPosX + currentBlockWidth - 1;
+    while (tempStartPosX > 0) {
+        int8_t tempBlock = getBlock(tempStartPosX - 1, tempPosY);
+        if (tempBlock != currentBlock) {
+            break;
+        }
+        tempStartPosX -= 1;
+    }
+    while (tempEndPosX < boardWidth - 1) {
+        int8_t tempBlock = getBlock(tempEndPosX + 1, tempPosY);
+        if (tempBlock != currentBlock) {
+            break;
+        }
+        tempEndPosX += 1;
+    }
+    int8_t tempCount = tempEndPosX - tempStartPosX + 1;
+    if (tempCount >= 3) {
+        int8_t tempPosX = tempStartPosX;
+        while (tempPosX <= tempEndPosX) {
+            setBlock(tempPosX, tempPosY, 0);
+            drawBlock(tempPosX, tempPosY, 0);
+            tempPosX += 1;
+        }
+    }
+    // TODO: Increase score.
+    
     generateCurrentBlock();
     drawCurrentBlock();
     return true;
