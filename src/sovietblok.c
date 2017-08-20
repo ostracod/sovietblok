@@ -9,9 +9,9 @@
 #define true 1
 #define false 0
 
-#define CYAN_ON_BLUE 1
-#define BLACK_ON_CYAN 2
-#define BLACK_ON_WHITE 3
+#define BLUE_ON_CYAN 1
+#define CYAN_ON_WHITE 2
+#define WHITE_ON_YELLOW 3
 #define WHITE_ON_BLACK 4
 #define WHITE_ON_RED 5
 #define WHITE_ON_GREEN 6
@@ -24,6 +24,9 @@ int32_t blockHeight = 3;
 int8_t boardWidth = 8;
 int8_t boardHeight = 4;
 int8_t *board;
+int8_t currentBlock;
+int8_t currentBlockWidth;
+int8_t currentBlockPosX;
 
 void clearBoard() {
     int8_t index = 0;
@@ -34,7 +37,7 @@ void clearBoard() {
 }
 
 void drawBackground() {
-    attron(COLOR_PAIR(BLACK_ON_CYAN));
+    attron(COLOR_PAIR(CYAN_ON_WHITE));
     int32_t tempPosY = 0;
     while (tempPosY < windowHeight) {
         int32_t tempPosX = 0;
@@ -44,7 +47,7 @@ void drawBackground() {
         }
         tempPosY += 1;
     }
-    attroff(COLOR_PAIR(BLACK_ON_CYAN));
+    attroff(COLOR_PAIR(CYAN_ON_WHITE));
 }
 
 void drawBlock(int8_t block, int32_t posX, int32_t posY) {
@@ -88,9 +91,33 @@ void drawBoard() {
     }
 }
 
+void generateCurrentBlock() {
+    currentBlock = 1 + rand() % 5;
+    if (currentBlock == 5) {
+        currentBlock = 1;
+    }
+    currentBlockWidth = 1 + rand() % 2;
+    currentBlockPosX = 3;
+}
+
+void drawCurrentBlock() {
+    drawBlock(currentBlock, currentBlockPosX, -1);
+    if (currentBlockWidth > 1) {
+        drawBlock(currentBlock, currentBlockPosX + 1, -1);
+    }
+}
+
+void eraseCurrentBlock() {
+    drawBlock(0, currentBlockPosX, -1);
+    if (currentBlockWidth > 1) {
+        drawBlock(0, currentBlockPosX + 1, -1);
+    }
+}
+
 void drawEverything() {
     drawBackground();
     drawBoard();
+    drawCurrentBlock();
 }
 
 void handleResize() {
@@ -129,6 +156,7 @@ int main(int argc, const char *argv[]) {
     int8_t tempBoard[boardWidth * boardHeight];
     board = tempBoard;
     clearBoard();
+    generateCurrentBlock();
     
     window = initscr();
     noecho();
@@ -136,12 +164,12 @@ int main(int argc, const char *argv[]) {
     keypad(window, true);
     ESCDELAY = 50;
     start_color();
-    init_pair(BLACK_ON_CYAN, COLOR_BLACK, COLOR_CYAN);
-    init_pair(BLACK_ON_WHITE, COLOR_BLACK, COLOR_WHITE);
+    init_pair(BLUE_ON_CYAN, COLOR_BLUE, COLOR_CYAN);
+    init_pair(CYAN_ON_WHITE, COLOR_CYAN, COLOR_WHITE);
+    init_pair(WHITE_ON_YELLOW, COLOR_WHITE, COLOR_YELLOW);
     init_pair(WHITE_ON_BLACK, COLOR_WHITE, COLOR_BLACK);
     init_pair(WHITE_ON_RED, COLOR_WHITE, COLOR_RED);
     init_pair(WHITE_ON_GREEN, COLOR_WHITE, COLOR_GREEN);
-    init_pair(CYAN_ON_BLUE, COLOR_CYAN, COLOR_BLUE);
     handleResize();
     
     while (true) {
