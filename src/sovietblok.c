@@ -145,6 +145,45 @@ void moveCurrentBlock(int8_t offsetX) {
     drawCurrentBlock();
 }
 
+int8_t getBlock(int8_t posX, int8_t posY) {
+    return board[posX + posY * boardWidth];
+}
+
+void setBlock(int8_t posX, int8_t posY, int8_t block) {
+    board[posX + posY * boardWidth] = block;
+}
+
+int8_t dropBlock() {
+    int8_t tempPosY = 0;
+    while (tempPosY < boardHeight) {
+        int8_t tempBlock = getBlock(currentBlockPosX, tempPosY);
+        if (tempBlock > 0) {
+            break;
+        }
+        if (currentBlockWidth > 1) {
+            int8_t tempBlock = getBlock(currentBlockPosX + 1, tempPosY);
+            if (tempBlock > 0) {
+                break;
+            }
+        }
+        tempPosY += 1;
+    }
+    tempPosY -= 1;
+    if (tempPosY < 0) {
+        return false;
+    }
+    eraseCurrentBlock();
+    setBlock(currentBlockPosX, tempPosY, currentBlock);
+    drawBlock(currentBlock, currentBlockPosX, tempPosY);
+    if (currentBlockWidth > 1) {
+        setBlock(currentBlockPosX + 1, tempPosY, currentBlock);
+        drawBlock(currentBlock, currentBlockPosX + 1, tempPosY);
+    }
+    generateCurrentBlock();
+    drawCurrentBlock();
+    return true;
+}
+
 int8_t processKey() {
     int32_t tempKey = getch();
     if (tempKey == KEY_RESIZE) {
@@ -157,7 +196,7 @@ int8_t processKey() {
         moveCurrentBlock(1);
     }
     if (tempKey == KEY_DOWN || tempKey == 's') {
-        
+        return dropBlock();
     }
     return true;
 }
